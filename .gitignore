@@ -1,0 +1,13 @@
+node_modules/
+frontend/dist/
+frontend/test-results/
+frontend/playwright-report/
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+venv/
+.env
+.e2e-data/
+.data/
+backend/.data/

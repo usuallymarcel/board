@@ -1,0 +1,13 @@
+.git
+**/node_modules
+**/__pycache__
+**/.pytest_cache
+**/.venv
+frontend/dist
+frontend/e2e
+frontend/test-results
+frontend/playwright-report
+backend/tests
+*.md
+.e2e-data
+frontend/test-results

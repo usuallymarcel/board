@@ -1,0 +1,45 @@
+services:
+  board:
+    build: .
+    container_name: board
+    restart: unless-stopped
+    ports:
+      # Loopback only. Public traffic comes through Traefik, and uvicorn trusts its forwarded headers.
+      - "127.0.0.1:${BOARD_PORT:-8081}:8000"
+    environment:
+      DATA_DIR: /data
+      MAX_UPLOAD_MB: ${MAX_UPLOAD_MB:-500}
+      USER_QUOTA_MB: ${USER_QUOTA_MB:-10240}
+      USERS_API_URL: ${USERS_API_URL:-http://users-api:8000}
+      ALLOW_SIGNUP: ${ALLOW_SIGNUP:-true}
+      AUTH_FAIL_MODE: ${AUTH_FAIL_MODE:-closed}
+      ADMIN_USERS: ${ADMIN_USERS:-}
+    volumes:
+      - board_data:/data
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request as u; u.urlopen('http://127.0.0.1:8000/api/readyz', timeout=3)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    labels:
+      - "traefik.enable=true"
+
+      - "traefik.http.routers.board.rule=Host(`board.marcel.co.nz`)"
+      - "traefik.http.routers.board.entrypoints=websecure"
+      - "traefik.http.routers.board.tls=true"
+      - "traefik.http.routers.board.tls.certresolver=myresolver"
+
+      - "traefik.http.services.board.loadbalancer.server.port=8000"
+
+    networks:
+      - proxy
+
+volumes:
+  board_data:
+
+networks:
+  proxy:
+    external: true
